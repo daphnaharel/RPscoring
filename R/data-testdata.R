@@ -2,7 +2,7 @@
 #'
 #' This synthetic dataset represents the placements of \emph{n} contestants (rows) by \emph{J} judges (columns).
 #'
-#' @format A data frame with 11 rows and 8 variables:
+#' @format A data frame with 8 contestants (rows) and 5 judges (variables):
 #' \describe{
 #'   \item{J1}{rankings for Judge 1}
 #'   \item{J2}{rankings for Judge 1}
