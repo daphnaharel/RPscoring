@@ -1,4 +1,4 @@
-Package: RelativePlacement
+Package: RPscoring
 Type: Package
 Title: Relative Placement Algorithm
 Version: 0.1.0
