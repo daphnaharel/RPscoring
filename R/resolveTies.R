@@ -12,9 +12,8 @@
 
 resolveTies <- function(data, contestants, column) {
   numJudges <- ncol(data)
-  majority <- ceiling(numJudges/2)
+  majority <- ifelse(c(numJudges/2) %% 1 == 0,numJudges/2 + 1, ceiling(numJudges/2))
 
-  #start by 1s and 2s
   sumscoreThreshold <- column
   nextScore <- column+1
   sumscores <- apply(data[contestants,], 1, function(a){
@@ -22,7 +21,6 @@ resolveTies <- function(data, contestants, column) {
   })
   winner <- contestants[which.min(sumscores)]
   winnerScore <- sumscores[which(contestants == winner)]
-  ## check if anyone else has the same score
   tiedwinner <- any(winnerScore == sumscores[
     which(contestants %in% setdiff(contestants,winner))])
 
@@ -30,11 +28,10 @@ resolveTies <- function(data, contestants, column) {
     return(list(winnerfound="sumscore",
                 winner=winner))
   }
-  if(tiedwinner) {
+  else if(tiedwinner) {
 
-    # there's only one tie
     if (length(sumscores[which(as.vector(table(sumscores)) > 1)]) == 1){
-      while(tiedwinner & nextScore <= ncol(data)) {
+      while(tiedwinner & nextScore <= nrow(data)) {
         nscores <- apply(data[contestants,], 1, function(a){
           length(which(a == nextScore))
         })
@@ -47,9 +44,9 @@ resolveTies <- function(data, contestants, column) {
                       winner=winner))
         } else {
           nextScore <- nextScore + 1
-          }
+        }
       }
-      if (nextScore > ncol(data)) {
+      if (nextScore > nrow(data)) {
 
         reducedData <- apply(data[contestants,], 2, function(a) {order(a)})
 
@@ -65,7 +62,6 @@ resolveTies <- function(data, contestants, column) {
       }
     }
 
-    ## there are more than one tie on sumscores.
     else if(length(sumscores[which(as.vector(table(sumscores)) > 1)]) > 1){
 
       tiebreakContestants = contestants[which(sumscores == min(sumscores))]
@@ -76,7 +72,9 @@ resolveTies <- function(data, contestants, column) {
 
       return(list(winnerfound="sumscoretie",
                   winner=winner))
+
     }
 
   }
 }
+

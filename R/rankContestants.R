@@ -10,13 +10,12 @@
 rankContestants <- function(data) {
   dashmat <- dashmatrix(data)
   numJudges <- ncol(data)
-  majority <- ceiling(numJudges/2)
+  majority <- ifelse(c(numJudges/2) %% 1 == 0,numJudges/2 + 1, ceiling(numJudges/2))
   finalRanking <- rep(NA, nrow(data))
   rankPlace <- 1
   removedFromRank <- c()
   col = 1
 
-  # This works if its truly a perfect tie, but not when called recursively
   if (all(apply(dashmat, 2, function(x) length(unique(x)) == 1) == TRUE)){
     finalRanking[1:nrow(data)] = rep(rankPlace, nrow(data))
     rankPlace = rankPlace + nrow(data)
@@ -28,7 +27,6 @@ rankContestants <- function(data) {
         col = col + 1
       }
       else if (length(achievedMajority) == 1) {
-        # majority detected
         finalRanking[achievedMajority] <- rankPlace
         removedFromRank <- c(removedFromRank, achievedMajority)
         rankPlace <- rankPlace + 1
@@ -36,12 +34,9 @@ rankContestants <- function(data) {
       }
       else if (length(achievedMajority) > 1) {
         while (length(achievedMajority) >= 2) {
-          ## check if there is a unique winner in this column
           winner <- achievedMajority[which.max(dashmat[achievedMajority, col])]
           winnerScore <- dashmat[winner, col]
-          ## check if anyone else has the same score
           ties <- any(winnerScore == dashmat[setdiff(achievedMajority,winner), col])
-          ## if not, then declare unique winner
           if (!ties) {
             finalRanking[winner] <- rankPlace
             rankPlace <- rankPlace + 1
@@ -50,7 +45,6 @@ rankContestants <- function(data) {
             col = col + length(winner) - 1
           }
           else {
-            # resolve ties
             tieResults <- resolveTies(data, achievedMajority, col)
 
             if (tieResults$winnerfound == "sumscoretie"){
@@ -59,7 +53,6 @@ rankContestants <- function(data) {
               removedFromRank <- c(removedFromRank, tieResults$winner)
               achievedMajority <- setdiff(achievedMajority, tieResults$winner)
               col = col + length(tieResults$winner) - 1
-
             }
             else if (tieResults$winnerfound == "nextscore") {
               finalRanking[tieResults$winner] <- rankPlace
@@ -87,7 +80,7 @@ rankContestants <- function(data) {
               rankPlace <- rankPlace + length(tieResults$winner)
               removedFromRank <- c(removedFromRank, tieResults$winner)
               achievedMajority <- setdiff(achievedMajority, tieResults$winner)
-              col = col + length(tieResults$winner) - 1
+              col = col + 1
             }
           }
 
